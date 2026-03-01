@@ -1,0 +1,87 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - cyclop
+    - dupl
+    - funlen
+    - gocognit
+    - goconst
+    - gocritic
+    - godot
+    - gofmt
+    - goimports
+    - gomnd
+    - gosec
+    - lll
+    - misspell
+    - noctx
+    - prealloc
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - unparam
+    - whitespace
+    - wrapcheck
+
+linters-settings:
+  cyclop:
+    max-complexity: 15
+
+  funlen:
+    lines: 80
+    statements: 50
+
+  gocognit:
+    min-complexity: 20
+
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+  goimports:
+    local-prefixes: github.com/hebertzin/cqrs
+
+  lll:
+    line-length: 120
+
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+      - name: var-naming
+        severity: warning
+
+  gosec:
+    excludes:
+      - G401
+      - G501
+
+issues:
+  exclude-rules:
+    - path: "_test\\.go"
+      linters:
+        - funlen
+        - dupl
+        - gomnd
+        - gosec
+        - wrapcheck
+
+    - path: "tests/"
+      linters:
+        - funlen
+        - dupl
+        - gomnd
+        - wrapcheck
+
+    - path: "cmd/"
+      linters:
+        - funlen
+        - wrapcheck
