@@ -4,10 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-<<<<<<< HEAD
 
-=======
->>>>>>> c4f71672c010347ab5a24d9bfd7962045ae3009e
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 

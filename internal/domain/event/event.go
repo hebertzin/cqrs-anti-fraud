@@ -24,11 +24,7 @@ type Event interface {
 
 type Base struct {
 	ID          uuid.UUID `json:"id"`
-<<<<<<< HEAD
-	EventType   Type      `json:"event_type"`
-=======
 	EventType   Type      `json:"type"`
->>>>>>> c4f71672c010347ab5a24d9bfd7962045ae3009e
 	AggregateID uuid.UUID `json:"aggregate_id"`
 	OccurredAt  time.Time `json:"occurred_at"`
 }
@@ -42,14 +38,7 @@ func NewBase(eventType Type, aggregateID uuid.UUID) Base {
 	}
 }
 
-<<<<<<< HEAD
-func (b Base) GetID() uuid.UUID          { return b.ID }
-func (b Base) GetType() Type             { return b.EventType }
-func (b Base) GetAggregateID() uuid.UUID { return b.AggregateID }
-func (b Base) GetOccurredAt() time.Time  { return b.OccurredAt }
-=======
-func (e Base) GetID() uuid.UUID        { return e.ID }
-func (e Base) GetType() Type           { return e.EventType }
+func (e Base) GetID() uuid.UUID          { return e.ID }
+func (e Base) GetType() Type             { return e.EventType }
 func (e Base) GetAggregateID() uuid.UUID { return e.AggregateID }
 func (e Base) GetOccurredAt() time.Time  { return e.OccurredAt }
->>>>>>> c4f71672c010347ab5a24d9bfd7962045ae3009e
