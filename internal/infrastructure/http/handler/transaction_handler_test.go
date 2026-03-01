@@ -34,7 +34,6 @@ func (h *fakeAnalyzeTxHandler) Handle(_ context.Context, _ bus.Command) (bus.Com
 	}, nil
 }
 
-// fakeGetTxRiskHandler is a test double for the get transaction risk query handler.
 type fakeGetTxRiskHandler struct {
 	view *model.TransactionRiskView
 }

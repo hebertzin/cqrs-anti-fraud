@@ -5,15 +5,12 @@ import (
 	"fmt"
 )
 
-// Query is a marker interface for all queries.
 type Query interface{}
 
-// QueryHandler processes a specific query type and returns a result.
 type QueryHandler interface {
 	Handle(ctx context.Context, query Query) (interface{}, error)
 }
 
-// QueryBus routes queries to their registered handlers.
 type QueryBus struct {
 	handlers map[string]QueryHandler
 }

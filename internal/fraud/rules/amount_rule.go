@@ -7,7 +7,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 
-// AmountRule flags transactions that exceed a configurable threshold.
 type AmountRule struct {
 	Threshold float64
 }

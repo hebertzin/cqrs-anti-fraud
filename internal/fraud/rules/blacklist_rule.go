@@ -8,13 +8,11 @@ import (
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 
-// Blacklist provides a lookup for blocked accounts and merchants.
 type Blacklist interface {
 	IsAccountBlacklisted(ctx context.Context, accountID uuid.UUID) (bool, error)
 	IsMerchantBlacklisted(ctx context.Context, merchantID string) (bool, error)
 }
 
-// BlacklistRule flags transactions from blacklisted accounts or merchants.
 type BlacklistRule struct {
 	blacklist Blacklist
 }

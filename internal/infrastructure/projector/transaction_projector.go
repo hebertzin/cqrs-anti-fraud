@@ -11,7 +11,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/query/repository"
 )
 
-// TransactionProjector listens to transaction events and updates the read model.
 type TransactionProjector struct {
 	txReadRepo      repository.TransactionReadRepository
 	accountReadRepo repository.AccountReadRepository
@@ -30,7 +29,6 @@ func NewTransactionProjector(
 	}
 }
 
-// Register subscribes the projector to relevant domain events.
 func (p *TransactionProjector) Register(bus eventbus.EventBus) {
 	bus.Subscribe(event.TypeTransactionAnalyzed, p.onTransactionAnalyzed)
 	bus.Subscribe(event.TypeTransactionFlagged, p.onTransactionFlagged)

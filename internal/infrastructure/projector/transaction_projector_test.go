@@ -17,8 +17,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/query/model"
 )
 
-// --- Read repo mocks ---
-
 type mockTxReadRepo struct{ mock.Mock }
 
 func (m *mockTxReadRepo) GetByID(ctx context.Context, id uuid.UUID) (*model.TransactionRiskView, error) {

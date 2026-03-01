@@ -10,7 +10,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/query/repository"
 )
 
-// AccountProjector listens to account events and updates the read model.
 type AccountProjector struct {
 	accountReadRepo repository.AccountReadRepository
 	logger          *zap.Logger

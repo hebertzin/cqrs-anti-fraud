@@ -5,18 +5,14 @@ import (
 	"fmt"
 )
 
-// Command is a marker interface for all commands.
 type Command interface{}
 
-// CommandResult is the result returned by a command handler.
 type CommandResult interface{}
 
-// CommandHandler processes a specific command type.
 type CommandHandler interface {
 	Handle(ctx context.Context, command Command) (CommandResult, error)
 }
 
-// CommandBus routes commands to their registered handlers.
 type CommandBus struct {
 	handlers map[string]CommandHandler
 }

@@ -18,8 +18,8 @@ import (
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
 	"github.com/hebertzin/cqrs/internal/config"
 	"github.com/hebertzin/cqrs/internal/fraud/rules"
-	httphandler "github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
 	infrahttp "github.com/hebertzin/cqrs/internal/infrastructure/http"
+	httphandler "github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
 	"github.com/hebertzin/cqrs/internal/infrastructure/messaging/inmemory"
 	pgrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/postgres"
 	redisrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/redis"
@@ -37,7 +37,6 @@ func main() {
 	}
 	defer log.Sync() //nolint:errcheck
 
-	// --- Infrastructure ---
 	pgPool, err := pgxpool.New(context.Background(), cfg.Postgres.DSN)
 	if err != nil {
 		log.Fatal("failed to connect to postgres", zap.Error(err))
@@ -51,30 +50,25 @@ func main() {
 	})
 	defer redisClient.Close() //nolint:errcheck
 
-	// --- Repositories ---
 	txWriteRepo := pgrepository.NewTransactionRepository(pgPool)
 	accountWriteRepo := pgrepository.NewAccountRepository(pgPool)
 	txReadRepo := redisrepository.NewTransactionRepository(redisClient)
 	accountReadRepo := redisrepository.NewAccountRepository(redisClient)
 
-	// --- Event Bus ---
 	eventBus := inmemory.NewEventBus(log)
 
-	// --- Projectors (read model updaters) ---
 	txProjector := projector.NewTransactionProjector(txReadRepo, accountReadRepo, log)
 	txProjector.Register(eventBus)
 
 	accountProjector := projector.NewAccountProjector(accountReadRepo, log)
 	accountProjector.Register(eventBus)
 
-	// --- Fraud Rules Engine ---
 	fraudEngine := rules.NewEngine(
 		rules.NewAmountRule(cfg.FraudRules.AmountThreshold),
 		rules.NewVelocityRule(cfg.FraudRules.MaxTransactionsPerHour, txWriteRepo),
 		rules.NewLocationRule(nil),
 	)
 
-	// --- Command Bus ---
 	commandBus := bus.NewCommandBus()
 	commandBus.Register(cmdmodel.AnalyzeTransactionCommand, cmdhandler.NewAnalyzeTransactionHandler(
 		txWriteRepo, accountWriteRepo, eventBus, fraudEngine, log,
@@ -86,13 +80,11 @@ func main() {
 		txWriteRepo, eventBus, log,
 	))
 
-	// --- Query Bus ---
 	queryBus := bus.NewQueryBus()
 	queryBus.Register(queryhandler.GetTransactionRiskKey, queryhandler.NewGetTransactionRiskHandler(txReadRepo))
 	queryBus.Register(queryhandler.GetAccountStatusKey, queryhandler.NewGetAccountStatusHandler(accountReadRepo))
 	queryBus.Register(queryhandler.GetFraudAlertsKey, queryhandler.NewGetFraudAlertsHandler(txReadRepo))
 
-	// --- HTTP Server ---
 	txHTTPHandler := httphandler.NewTransactionHandler(commandBus, queryBus, log)
 	accountHTTPHandler := httphandler.NewAccountHandler(commandBus, queryBus, log)
 	healthHTTPHandler := httphandler.NewHealthHandler()

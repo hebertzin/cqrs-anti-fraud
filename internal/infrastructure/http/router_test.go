@@ -17,8 +17,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/query/model"
 )
 
-// stub handlers for wiring the router in tests
-
 type noopCmdHandler struct{}
 
 func (h *noopCmdHandler) Handle(_ context.Context, _ bus.Command) (bus.CommandResult, error) {
