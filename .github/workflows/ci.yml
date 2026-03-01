@@ -36,7 +36,6 @@ jobs:
           cache: true
 
       - name: Run unit tests
-        # Excludes DB-dependent persistence adapters (covered by integration tests).
         run: |
           UNIT_PKGS=$(go list ./internal/... | grep -v '/persistence/' | tr '\n' ' ')
           COVERPKGS=$(go list ./internal/... | grep -v '/persistence/' | tr '\n' ',')
