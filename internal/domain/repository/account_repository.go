@@ -7,7 +7,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 
-// AccountWriteRepository defines write operations for accounts (command side).
 type AccountWriteRepository interface {
 	Save(ctx context.Context, account *entity.Account) error
 	Update(ctx context.Context, account *entity.Account) error

@@ -7,7 +7,6 @@ import (
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 
-// TransactionWriteRepository defines write operations for transactions (command side).
 type TransactionWriteRepository interface {
 	Save(ctx context.Context, transaction *entity.Transaction) error
 	Update(ctx context.Context, transaction *entity.Transaction) error
