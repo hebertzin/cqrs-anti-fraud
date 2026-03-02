@@ -19,15 +19,14 @@ linters:
     - bodyclose
     - gosec
     - misspell
-
-linters-settings:
-  gosec:
-    excludes:
-      - G104
-      - G117
-      - G401
-      - G501
-      - G704
+  settings:
+    gosec:
+      excludes:
+        - G104
+        - G117
+        - G401
+        - G501
+        - G704
 
 issues:
   exclude-rules:
@@ -40,3 +39,15 @@ issues:
       linters:
         - errcheck
         - gosec
+
+    - linters:
+        - gosec
+      text: "G104"
+
+    - linters:
+        - gosec
+      text: "G117"
+
+    - linters:
+        - gosec
+      text: "G704"

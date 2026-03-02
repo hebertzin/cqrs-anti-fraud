@@ -9,8 +9,8 @@ import (
 type FraudAlertStatus string
 
 const (
-	FraudAlertStatusOpen     FraudAlertStatus = "open"
-	FraudAlertStatusReviewed FraudAlertStatus = "reviewed"
+	FraudAlertStatusOpen      FraudAlertStatus = "open"
+	FraudAlertStatusReviewed  FraudAlertStatus = "reviewed"
 	FraudAlertStatusDismissed FraudAlertStatus = "dismissed"
 )
 
