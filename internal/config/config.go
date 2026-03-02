@@ -9,6 +9,7 @@ type Config struct {
 	HTTPPort   string
 	Postgres   PostgresConfig
 	Redis      RedisConfig
+	RabbitMQ   RabbitMQConfig
 	FraudRules FraudRulesConfig
 }
 
@@ -20,6 +21,10 @@ type RedisConfig struct {
 	Addr     string
 	Password string
 	DB       int
+}
+
+type RabbitMQConfig struct {
+	URL string
 }
 
 type FraudRulesConfig struct {
@@ -41,6 +46,9 @@ func Load() Config {
 			Addr:     getEnv("REDIS_ADDR", "localhost:6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       redisDB,
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL: getEnv("RABBITMQ_URL", ""),
 		},
 		FraudRules: FraudRulesConfig{
 			AmountThreshold:        amountThreshold,
