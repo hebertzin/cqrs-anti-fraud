@@ -139,7 +139,10 @@ func TestIntegration_AnalyzeTransaction_LowRisk(t *testing.T) {
 		"location":    "BR",
 	})
 
-	resp, err := http.Post(ts.server.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, ts.server.URL+"/api/v1/transactions", bytes.NewReader(body))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -167,7 +170,10 @@ func TestIntegration_AnalyzeTransaction_HighRisk(t *testing.T) {
 		"location":    "XX",
 	})
 
-	resp, err := http.Post(ts.server.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, ts.server.URL+"/api/v1/transactions", bytes.NewReader(body))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -184,7 +190,9 @@ func TestIntegration_HealthCheck(t *testing.T) {
 	ts := buildTestServer(t)
 	defer ts.server.Close()
 
-	resp, err := http.Get(ts.server.URL + "/health")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, ts.server.URL+"/health", nil)
+	require.NoError(t, err)
+	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
 

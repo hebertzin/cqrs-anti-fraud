@@ -2,6 +2,7 @@ package projector
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -57,7 +58,7 @@ func (p *TransactionProjector) onTransactionAnalyzed(ctx context.Context, e even
 
 	if err := p.txReadRepo.Save(ctx, view); err != nil {
 		p.logger.Error("failed to project transaction view", zap.Error(err))
-		return err
+		return fmt.Errorf("project transaction view: %w", err)
 	}
 
 	if err := p.accountReadRepo.IncrementTransactionCount(ctx, evt.AccountID); err != nil {
@@ -94,5 +95,8 @@ func (p *TransactionProjector) onTransactionFlagged(ctx context.Context, e event
 	view.Status = "flagged"
 	view.UpdatedAt = evt.OccurredAt
 
-	return p.txReadRepo.Save(ctx, view)
+	if err := p.txReadRepo.Save(ctx, view); err != nil {
+		return fmt.Errorf("update flagged transaction view: %w", err)
+	}
+	return nil
 }

@@ -28,5 +28,9 @@ func (b *QueryBus) Query(ctx context.Context, queryType string, query Query) (in
 	if !ok {
 		return nil, fmt.Errorf("no handler registered for query: %s", queryType)
 	}
-	return handler.Handle(ctx, query)
+	result, err := handler.Handle(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("handling query %s: %w", queryType, err)
+	}
+	return result, nil
 }

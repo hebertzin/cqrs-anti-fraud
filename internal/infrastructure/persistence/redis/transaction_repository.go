@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	txKeyPrefix    = "tx:"
-	fraudAlertKey  = "fraud:alerts"
-	txTTL          = 24 * time.Hour
+	txKeyPrefix   = "tx:"
+	fraudAlertKey = "fraud:alerts"
+	txTTL         = 24 * time.Hour
 )
 
 type TransactionRepository struct {

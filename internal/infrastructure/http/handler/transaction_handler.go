@@ -10,8 +10,8 @@ import (
 
 	"github.com/hebertzin/cqrs/internal/application/bus"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
-	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 	"github.com/hebertzin/cqrs/internal/infrastructure/http/response"
+	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 )
 
 type TransactionHandler struct {
@@ -86,7 +86,8 @@ func (h *TransactionHandler) GetTransactionRisk(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	result, err := h.queryBus.Query(r.Context(), queryhandler.GetTransactionRiskKey, queryhandler.GetTransactionRiskQuery{TransactionID: id})
+	query := queryhandler.GetTransactionRiskQuery{TransactionID: id}
+	result, err := h.queryBus.Query(r.Context(), queryhandler.GetTransactionRiskKey, query)
 	if err != nil {
 		h.logger.Error("failed to get transaction risk", zap.Error(err))
 		response.Error(w, http.StatusNotFound, "transaction not found")

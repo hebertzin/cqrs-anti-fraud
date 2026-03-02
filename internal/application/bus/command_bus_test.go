@@ -50,5 +50,5 @@ func TestCommandBus_HandlerReturnsError(t *testing.T) {
 
 	_, err := b.Dispatch(context.Background(), "FakeCommand", fakeCommand{})
 
-	assert.Equal(t, expectedErr, err)
+	assert.ErrorIs(t, err, expectedErr)
 }

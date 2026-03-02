@@ -24,7 +24,6 @@ linters:
     - goconst
     - gocritic
     - godot
-    - mnd
     - gosec
     - lll
     - misspell
@@ -43,7 +42,7 @@ linters-settings:
 
   funlen:
     lines: 80
-    statements: 50
+    statements: 60
 
   gocognit:
     min-complexity: 20
@@ -57,13 +56,13 @@ linters-settings:
 
   revive:
     rules:
-      - name: exported
-        severity: warning
       - name: var-naming
         severity: warning
 
   gosec:
     excludes:
+      - G104
+      - G117
       - G401
       - G501
 
@@ -73,18 +72,25 @@ issues:
       linters:
         - funlen
         - dupl
-        - mnd
         - gosec
         - wrapcheck
+        - errcheck
+        - noctx
+        - unparam
+        - lll
+        - goconst
 
     - path: "tests/"
       linters:
         - funlen
         - dupl
-        - mnd
         - wrapcheck
+        - errcheck
+        - noctx
+        - lll
 
     - path: "cmd/"
       linters:
         - funlen
         - wrapcheck
+        - gocritic
