@@ -1,5 +1,14 @@
 version: "2"
 
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/hebertzin/cqrs
+
 linters:
   enable:
     - errcheck
@@ -16,9 +25,7 @@ linters:
     - goconst
     - gocritic
     - godot
-    - gofmt
-    - goimports
-    - gomnd
+    - mnd
     - gosec
     - lll
     - misspell
@@ -46,9 +53,6 @@ linters-settings:
     min-len: 3
     min-occurrences: 3
 
-  goimports:
-    local-prefixes: github.com/hebertzin/cqrs
-
   lll:
     line-length: 120
 
@@ -70,7 +74,7 @@ issues:
       linters:
         - funlen
         - dupl
-        - gomnd
+        - mnd
         - gosec
         - wrapcheck
 
@@ -78,7 +82,7 @@ issues:
       linters:
         - funlen
         - dupl
-        - gomnd
+        - mnd
         - wrapcheck
 
     - path: "cmd/"
