@@ -2,6 +2,8 @@
 
 > Serviço de detecção de fraudes construído sobre o padrão **CQRS (Command Query Responsibility Segregation)**, demonstrando como separar operações de escrita e leitura para escalar cada lado independentemente.
 
+ <img width="802" height="657" alt="image" src="https://github.com/user-attachments/assets/99de2cc3-8131-474c-9cc6-49b01a4d9332" />
+
 ---
 
 ## Por que o CQRS existe?
