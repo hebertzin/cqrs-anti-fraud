@@ -5,10 +5,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 
 	"github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
 	"github.com/hebertzin/cqrs/internal/infrastructure/http/middleware"
-	"go.uber.org/zap"
 )
 
 func NewRouter(

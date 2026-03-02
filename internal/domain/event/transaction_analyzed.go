@@ -2,6 +2,7 @@ package event
 
 import (
 	"github.com/google/uuid"
+
 	"github.com/hebertzin/cqrs/internal/domain/entity"
 )
 

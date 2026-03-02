@@ -12,8 +12,8 @@ import (
 	cmdhandler "github.com/hebertzin/cqrs/internal/command/handler"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
 	"github.com/hebertzin/cqrs/internal/domain/entity"
-	"github.com/hebertzin/cqrs/tests/mocks"
 	"github.com/hebertzin/cqrs/pkg/logger"
+	"github.com/hebertzin/cqrs/tests/mocks"
 )
 
 func TestBlockAccountHandler_Success(t *testing.T) {

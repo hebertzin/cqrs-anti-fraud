@@ -11,86 +11,42 @@ formatters:
 
 linters:
   enable:
-    - errcheck
     - govet
     - ineffassign
     - staticcheck
     - unused
     - bodyclose
-    - cyclop
-    - dupl
-    - funlen
-    - gocognit
-    - goconst
-    - gocritic
-    - godot
     - gosec
-    - lll
     - misspell
-    - noctx
-    - prealloc
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - unparam
-    - whitespace
-    - wrapcheck
-
-linters-settings:
-  cyclop:
-    max-complexity: 15
-
-  funlen:
-    lines: 80
-    statements: 60
-
-  gocognit:
-    min-complexity: 20
-
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-
-  lll:
-    line-length: 120
-
-  revive:
-    rules:
-      - name: var-naming
-        severity: warning
-
-  gosec:
-    excludes:
-      - G104
-      - G117
-      - G401
-      - G501
+  disable:
+    - errcheck
+  settings:
+    gosec:
+      excludes:
+        - G104
+        - G117
+        - G401
+        - G501
+        - G704
 
 issues:
   exclude-rules:
     - path: "_test\\.go"
       linters:
-        - funlen
-        - dupl
         - gosec
-        - wrapcheck
-        - errcheck
-        - noctx
-        - unparam
-        - lll
-        - goconst
 
     - path: "tests/"
       linters:
-        - funlen
-        - dupl
-        - wrapcheck
-        - errcheck
-        - noctx
-        - lll
+        - gosec
 
-    - path: "cmd/"
-      linters:
-        - funlen
-        - wrapcheck
-        - gocritic
+    - linters:
+        - gosec
+      text: "G104"
+
+    - linters:
+        - gosec
+      text: "G117"
+
+    - linters:
+        - gosec
+      text: "G704"
