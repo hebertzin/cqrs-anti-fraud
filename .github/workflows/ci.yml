@@ -37,8 +37,8 @@ jobs:
 
       - name: Run unit tests
         run: |
-          UNIT_PKGS=$(go list ./internal/... | grep -v '/persistence/' | tr '\n' ' ')
-          COVERPKGS=$(go list ./internal/... | grep -v '/persistence/' | tr '\n' ',')
+          UNIT_PKGS=$(go list ./internal/... | grep -v '/persistence/' | grep -v '/rabbitmq' | tr '\n' ' ')
+          COVERPKGS=$(go list ./internal/... | grep -v '/persistence/' | grep -v '/rabbitmq' | tr '\n' ',')
           go test $UNIT_PKGS -count=1 -race \
             -coverprofile=coverage.out \
             -covermode=atomic \

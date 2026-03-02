@@ -30,5 +30,9 @@ func (b *CommandBus) Dispatch(ctx context.Context, commandType string, command C
 	if !ok {
 		return nil, fmt.Errorf("no handler registered for command: %s", commandType)
 	}
-	return handler.Handle(ctx, command)
+	result, err := handler.Handle(ctx, command)
+	if err != nil {
+		return nil, fmt.Errorf("handling command %s: %w", commandType, err)
+	}
+	return result, nil
 }

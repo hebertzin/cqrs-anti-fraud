@@ -72,7 +72,9 @@ func (r *AccountRepository) IncrementDeclinedCount(ctx context.Context, accountI
 	})
 }
 
-func (r *AccountRepository) updateAccountView(ctx context.Context, accountID uuid.UUID, update func(*model.AccountStatusView)) error {
+func (r *AccountRepository) updateAccountView(
+	ctx context.Context, accountID uuid.UUID, update func(*model.AccountStatusView),
+) error {
 	view, err := r.GetByID(ctx, accountID)
 	if err != nil {
 		// If view doesn't exist, create a new one

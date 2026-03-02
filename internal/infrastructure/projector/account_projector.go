@@ -2,6 +2,7 @@ package projector
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -39,5 +40,8 @@ func (p *AccountProjector) onAccountBlocked(ctx context.Context, e event.Event) 
 	view.Status = "blocked"
 	view.BlockedAt = &now
 
-	return p.accountReadRepo.Save(ctx, view)
+	if err := p.accountReadRepo.Save(ctx, view); err != nil {
+		return fmt.Errorf("saving account view: %w", err)
+	}
+	return nil
 }

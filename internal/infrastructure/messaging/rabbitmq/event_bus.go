@@ -177,7 +177,10 @@ func (b *EventBus) dispatch(eventType event.Type, msg amqp.Delivery) error {
 
 func (b *EventBus) Close() error {
 	if err := b.ch.Close(); err != nil {
-		return err
+		return fmt.Errorf("close rabbitmq channel: %w", err)
 	}
-	return b.conn.Close()
+	if err := b.conn.Close(); err != nil {
+		return fmt.Errorf("close rabbitmq connection: %w", err)
+	}
+	return nil
 }

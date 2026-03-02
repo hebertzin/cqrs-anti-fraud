@@ -22,6 +22,12 @@ import (
 	"github.com/hebertzin/cqrs/internal/query/model"
 )
 
+type fakeFlagTxHandler struct{}
+
+func (h *fakeFlagTxHandler) Handle(_ context.Context, _ bus.Command) (bus.CommandResult, error) {
+	return nil, nil
+}
+
 // fakeAnalyzeTxHandler is a test double for the analyze transaction command handler.
 type fakeAnalyzeTxHandler struct{}
 
@@ -46,6 +52,7 @@ func buildTransactionHandler(t *testing.T) (*handler.TransactionHandler, *chi.Mu
 	t.Helper()
 	commandBus := bus.NewCommandBus()
 	commandBus.Register(cmdmodel.AnalyzeTransactionCommand, &fakeAnalyzeTxHandler{})
+	commandBus.Register(cmdmodel.FlagTransactionCommand, &fakeFlagTxHandler{})
 
 	txID := uuid.New()
 	view := &model.TransactionRiskView{
@@ -141,10 +148,77 @@ func TestTransactionHandler_AnalyzeTransaction_ZeroAmount(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
+func TestTransactionHandler_AnalyzeTransaction_InvalidCurrency(t *testing.T) {
+	_, r := buildTransactionHandler(t)
+
+	body, _ := json.Marshal(map[string]interface{}{
+		"account_id": uuid.New().String(),
+		"amount":     100.0,
+		"currency":   "BR",
+	})
+	req := httptest.NewRequest(http.MethodPost, "/transactions", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestTransactionHandler_GetTransactionRisk_Success(t *testing.T) {
+	_, r := buildTransactionHandler(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/transactions/"+uuid.New().String()+"/risk", nil)
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestTransactionHandler_GetTransactionRisk_InvalidID(t *testing.T) {
 	_, r := buildTransactionHandler(t)
 
 	req := httptest.NewRequest(http.MethodGet, "/transactions/not-a-uuid/risk", nil)
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestTransactionHandler_FlagTransaction_Success(t *testing.T) {
+	_, r := buildTransactionHandler(t)
+
+	body, _ := json.Marshal(map[string]interface{}{
+		"reason":     "suspicious activity",
+		"flagged_by": "analyst",
+	})
+	req := httptest.NewRequest(http.MethodPost, "/transactions/"+uuid.New().String()+"/flag", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func TestTransactionHandler_FlagTransaction_InvalidID(t *testing.T) {
+	_, r := buildTransactionHandler(t)
+
+	req := httptest.NewRequest(http.MethodPost, "/transactions/not-a-uuid/flag", bytes.NewReader([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestTransactionHandler_FlagTransaction_InvalidBody(t *testing.T) {
+	_, r := buildTransactionHandler(t)
+
+	req := httptest.NewRequest(http.MethodPost, "/transactions/"+uuid.New().String()+"/flag", bytes.NewReader([]byte("not-json")))
 	w := httptest.NewRecorder()
 
 	r.ServeHTTP(w, req)

@@ -10,8 +10,8 @@ import (
 
 	"github.com/hebertzin/cqrs/internal/application/bus"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
-	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 	"github.com/hebertzin/cqrs/internal/infrastructure/http/response"
+	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 )
 
 type AccountHandler struct {
@@ -36,7 +36,8 @@ func (h *AccountHandler) GetAccountStatus(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	result, err := h.queryBus.Query(r.Context(), queryhandler.GetAccountStatusKey, queryhandler.GetAccountStatusQuery{AccountID: id})
+	query := queryhandler.GetAccountStatusQuery{AccountID: id}
+	result, err := h.queryBus.Query(r.Context(), queryhandler.GetAccountStatusKey, query)
 	if err != nil {
 		h.logger.Error("failed to get account status", zap.Error(err))
 		response.Error(w, http.StatusNotFound, "account not found")

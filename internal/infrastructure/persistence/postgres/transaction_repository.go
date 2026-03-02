@@ -27,7 +27,8 @@ func (r *TransactionRepository) Save(ctx context.Context, tx *entity.Transaction
 	}
 
 	_, err = r.pool.Exec(ctx, `
-		INSERT INTO transactions (id, account_id, amount, currency, merchant_id, location, status, risk_score, metadata, created_at, updated_at)
+		INSERT INTO transactions
+			(id, account_id, amount, currency, merchant_id, location, status, risk_score, metadata, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		tx.ID, tx.AccountID, tx.Amount, tx.Currency, tx.MerchantID, tx.Location,
 		string(tx.Status), tx.RiskScore, metadata, tx.CreatedAt, tx.UpdatedAt,
@@ -75,7 +76,10 @@ func (r *TransactionRepository) FindByAccountID(ctx context.Context, accountID u
 		}
 		txs = append(txs, tx)
 	}
-	return txs, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating transaction rows: %w", err)
+	}
+	return txs, nil
 }
 
 func (r *TransactionRepository) CountRecentByAccountID(ctx context.Context, accountID uuid.UUID, withinMinutes int) (int, error) {
