@@ -101,23 +101,16 @@ func TestAnalyzeTransactionHandler_HighRisk(t *testing.T) {
 	assert.Equal(t, "high", txResult.RiskLevel)
 }
 
-func TestAnalyzeTransactionHandler_AccountNotFound_CreatesAccount(t *testing.T) {
+func TestAnalyzeTransactionHandler_AccountNotFound_ReturnsError(t *testing.T) {
 	txRepo := &mocks.TransactionWriteRepositoryMock{}
 	accRepo := &mocks.AccountWriteRepositoryMock{}
-	eventBus := &mocks.EventBusMock{}
 	log := logger.NewNop()
 
 	accountID := uuid.New()
-
-	// Simulate account not found → handler creates it
 	accRepo.On("FindByID", mock.Anything, accountID).Return((*entity.Account)(nil), assert.AnError)
-	accRepo.On("Save", mock.Anything, mock.Anything).Return(nil)
-	txRepo.On("Save", mock.Anything, mock.Anything).Return(nil)
-	txRepo.On("CountRecentByAccountID", mock.Anything, mock.Anything, mock.Anything).Return(0, nil)
-	eventBus.On("Publish", mock.Anything, mock.Anything).Return(nil)
 
 	fraudEngine := rules.NewEngine(rules.NewAmountRule(10000))
-	handler := cmdhandler.NewAnalyzeTransactionHandler(txRepo, accRepo, eventBus, fraudEngine, log)
+	handler := cmdhandler.NewAnalyzeTransactionHandler(txRepo, accRepo, nil, fraudEngine, log)
 
 	cmd := cmdmodel.AnalyzeTransaction{
 		AccountID:  accountID,
@@ -127,10 +120,9 @@ func TestAnalyzeTransactionHandler_AccountNotFound_CreatesAccount(t *testing.T) 
 		Location:   "BR",
 	}
 
-	result, err := handler.Handle(context.Background(), cmd)
+	_, err := handler.Handle(context.Background(), cmd)
 
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
+	assert.Error(t, err)
 	accRepo.AssertExpectations(t)
 }
 

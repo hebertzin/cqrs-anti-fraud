@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -26,8 +27,8 @@ import (
 	cmdhandler "github.com/hebertzin/cqrs/internal/command/handler"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
 	"github.com/hebertzin/cqrs/internal/fraud/rules"
-	httphandler "github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
 	infrahttp "github.com/hebertzin/cqrs/internal/infrastructure/http"
+	httphandler "github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
 	"github.com/hebertzin/cqrs/internal/infrastructure/messaging/inmemory"
 	pgrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/postgres"
 	redisrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/redis"
@@ -42,7 +43,12 @@ func skipIfNoInfra(t *testing.T) {
 	}
 }
 
-func buildTestServer(t *testing.T) *httptest.Server {
+type testServer struct {
+	server *httptest.Server
+	pgPool *pgxpool.Pool
+}
+
+func buildTestServer(t *testing.T) *testServer {
 	t.Helper()
 
 	pgDSN := os.Getenv("POSTGRES_DSN")
@@ -97,23 +103,43 @@ func buildTestServer(t *testing.T) *httptest.Server {
 		log,
 	)
 
-	return httptest.NewServer(router)
+	return &testServer{
+		server: httptest.NewServer(router),
+		pgPool: pgPool,
+	}
+}
+
+// insertTestAccount inserts an active account directly into the DB so the handler
+// can find it via FindByID (required by the FK constraint on transactions).
+func insertTestAccount(t *testing.T, pool *pgxpool.Pool, accountID uuid.UUID) {
+	t.Helper()
+	now := time.Now().UTC()
+	_, err := pool.Exec(context.Background(), `
+		INSERT INTO accounts (id, user_id, status, risk_level, created_at, updated_at)
+		VALUES ($1, $2, 'active', 0, $3, $3)
+		ON CONFLICT (id) DO NOTHING`,
+		accountID, accountID, now,
+	)
+	require.NoError(t, err)
 }
 
 func TestIntegration_AnalyzeTransaction_LowRisk(t *testing.T) {
 	skipIfNoInfra(t)
-	srv := buildTestServer(t)
-	defer srv.Close()
+	ts := buildTestServer(t)
+	defer ts.server.Close()
+
+	accountID := uuid.New()
+	insertTestAccount(t, ts.pgPool, accountID)
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"account_id":  uuid.New().String(),
+		"account_id":  accountID.String(),
 		"amount":      500.00,
 		"currency":    "BRL",
 		"merchant_id": "merchant-safe",
 		"location":    "BR",
 	})
 
-	resp, err := http.Post(srv.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
+	resp, err := http.Post(ts.server.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -127,18 +153,21 @@ func TestIntegration_AnalyzeTransaction_LowRisk(t *testing.T) {
 
 func TestIntegration_AnalyzeTransaction_HighRisk(t *testing.T) {
 	skipIfNoInfra(t)
-	srv := buildTestServer(t)
-	defer srv.Close()
+	ts := buildTestServer(t)
+	defer ts.server.Close()
+
+	accountID := uuid.New()
+	insertTestAccount(t, ts.pgPool, accountID)
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"account_id":  uuid.New().String(),
+		"account_id":  accountID.String(),
 		"amount":      99999.99,
 		"currency":    "USD",
 		"merchant_id": "merchant-suspicious",
 		"location":    "XX",
 	})
 
-	resp, err := http.Post(srv.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
+	resp, err := http.Post(ts.server.URL+"/api/v1/transactions", "application/json", bytes.NewReader(body))
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -152,10 +181,10 @@ func TestIntegration_AnalyzeTransaction_HighRisk(t *testing.T) {
 
 func TestIntegration_HealthCheck(t *testing.T) {
 	skipIfNoInfra(t)
-	srv := buildTestServer(t)
-	defer srv.Close()
+	ts := buildTestServer(t)
+	defer ts.server.Close()
 
-	resp, err := http.Get(srv.URL + "/health")
+	resp, err := http.Get(ts.server.URL + "/health")
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
