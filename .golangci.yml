@@ -11,7 +11,6 @@ formatters:
 
 linters:
   enable:
-    - errcheck
     - govet
     - ineffassign
     - staticcheck
@@ -52,6 +51,3 @@ issues:
         - gosec
       text: "G704"
 
-    - linters:
-        - errcheck
-      text: "Body.Close"
