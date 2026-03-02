@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -44,6 +45,22 @@ func (h *AnalyzeTransactionHandler) Handle(ctx context.Context, cmd bus.Command)
 	command, ok := cmd.(cmdmodel.AnalyzeTransaction)
 	if !ok {
 		return nil, fmt.Errorf("invalid command type for AnalyzeTransactionHandler")
+	}
+
+	// Ensure the account exists in the write store before inserting the transaction.
+	// The transactions table has a FK to accounts(id), so we upsert on first sight.
+	if _, err := h.accountRepo.FindByID(ctx, command.AccountID); err != nil {
+		now := time.Now().UTC()
+		acc := &entity.Account{
+			ID:        command.AccountID,
+			UserID:    command.AccountID,
+			Status:    entity.AccountStatusActive,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+		if saveErr := h.accountRepo.Save(ctx, acc); saveErr != nil {
+			return nil, fmt.Errorf("ensuring account exists: %w", saveErr)
+		}
 	}
 
 	tx := entity.NewTransaction(

@@ -21,7 +21,8 @@ func NewAccountRepository(pool *pgxpool.Pool) *AccountRepository {
 func (r *AccountRepository) Save(ctx context.Context, account *entity.Account) error {
 	_, err := r.pool.Exec(ctx, `
 		INSERT INTO accounts (id, user_id, status, risk_level, blocked_at, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (id) DO NOTHING`,
 		account.ID, account.UserID, string(account.Status), account.RiskLevel,
 		account.BlockedAt, account.CreatedAt, account.UpdatedAt,
 	)
