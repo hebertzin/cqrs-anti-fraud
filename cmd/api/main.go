@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -17,10 +18,11 @@ import (
 	cmdhandler "github.com/hebertzin/cqrs/internal/command/handler"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
 	"github.com/hebertzin/cqrs/internal/config"
+	"github.com/hebertzin/cqrs/internal/domain/event"
 	"github.com/hebertzin/cqrs/internal/fraud/rules"
 	infrahttp "github.com/hebertzin/cqrs/internal/infrastructure/http"
 	httphandler "github.com/hebertzin/cqrs/internal/infrastructure/http/handler"
-	"github.com/hebertzin/cqrs/internal/infrastructure/messaging/inmemory"
+	"github.com/hebertzin/cqrs/internal/infrastructure/messaging/rabbitmq"
 	pgrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/postgres"
 	redisrepository "github.com/hebertzin/cqrs/internal/infrastructure/persistence/redis"
 	"github.com/hebertzin/cqrs/internal/infrastructure/projector"
@@ -55,7 +57,24 @@ func main() {
 	txReadRepo := redisrepository.NewTransactionRepository(redisClient)
 	accountReadRepo := redisrepository.NewAccountRepository(redisClient)
 
-	eventBus := inmemory.NewEventBus(log)
+	eventBus, err := rabbitmq.NewEventBus(cfg.RabbitMQ.URL, log)
+	if err != nil {
+		log.Fatal("failed to connect to rabbitmq", zap.Error(err))
+	}
+	defer eventBus.Close() //nolint:errcheck
+
+	eventBus.RegisterFactory(event.TypeTransactionAnalyzed, func(b []byte) (event.Event, error) {
+		var e event.TransactionAnalyzed
+		return e, json.Unmarshal(b, &e)
+	})
+	eventBus.RegisterFactory(event.TypeTransactionFlagged, func(b []byte) (event.Event, error) {
+		var e event.TransactionFlagged
+		return e, json.Unmarshal(b, &e)
+	})
+	eventBus.RegisterFactory(event.TypeAccountBlocked, func(b []byte) (event.Event, error) {
+		var e event.AccountBlocked
+		return e, json.Unmarshal(b, &e)
+	})
 
 	txProjector := projector.NewTransactionProjector(txReadRepo, accountReadRepo, log)
 	txProjector.Register(eventBus)
