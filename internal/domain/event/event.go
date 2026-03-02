@@ -38,7 +38,7 @@ func NewBase(eventType Type, aggregateID uuid.UUID) Base {
 	}
 }
 
-func (e Base) GetID() uuid.UUID        { return e.ID }
-func (e Base) GetType() Type           { return e.EventType }
+func (e Base) GetID() uuid.UUID          { return e.ID }
+func (e Base) GetType() Type             { return e.EventType }
 func (e Base) GetAggregateID() uuid.UUID { return e.AggregateID }
 func (e Base) GetOccurredAt() time.Time  { return e.OccurredAt }
