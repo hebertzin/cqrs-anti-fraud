@@ -5,9 +5,6 @@
  <img width="802" height="657" alt="image" src="https://github.com/user-attachments/assets/99de2cc3-8131-474c-9cc6-49b01a4d9332" />
 
 ---
-
-## Por que o CQRS existe?
-
 ### O problema que ele resolve
 
 Em sistemas tradicionais (arquitetura CRUD padrão), um único modelo de dados serve tanto para **escrever** quanto para **ler**. Isso funciona bem em sistemas simples, mas cria gargalos conforme o sistema cresce:
