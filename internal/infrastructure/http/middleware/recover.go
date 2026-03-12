@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/hebertzin/cqrs/internal/infrastructure/http/response"
+	"github.com/hebertzin/cqrs/internal/infrastructure/http/httpresponse"
 )
 
 func Recover(logger *zap.Logger) func(http.Handler) http.Handler {
@@ -17,7 +17,7 @@ func Recover(logger *zap.Logger) func(http.Handler) http.Handler {
 						zap.Any("error", err),
 						zap.String("path", r.URL.Path),
 					)
-					response.Error(w, http.StatusInternalServerError, "internal server error")
+					httpresponse.Error(w, http.StatusInternalServerError, "internal server error")
 				}
 			}()
 			next.ServeHTTP(w, r)
