@@ -10,7 +10,7 @@ import (
 
 	"github.com/hebertzin/cqrs/internal/application/bus"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
-	"github.com/hebertzin/cqrs/internal/infrastructure/http/response"
+	"github.com/hebertzin/cqrs/internal/infrastructure/http/httpresponse"
 	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 )
 
@@ -40,22 +40,22 @@ type analyzeTransactionRequest struct {
 func (h *TransactionHandler) AnalyzeTransaction(w http.ResponseWriter, r *http.Request) {
 	var req analyzeTransactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid request body")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	accountID, err := uuid.Parse(req.AccountID)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid account_id format")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid account_id format")
 		return
 	}
 
 	if req.Amount <= 0 {
-		response.Error(w, http.StatusBadRequest, "amount must be greater than zero")
+		httpresponse.Error(w, http.StatusBadRequest, "amount must be greater than zero")
 		return
 	}
 	if len(req.Currency) != 3 {
-		response.Error(w, http.StatusBadRequest, "currency must be a 3-letter ISO code")
+		httpresponse.Error(w, http.StatusBadRequest, "currency must be a 3-letter ISO code")
 		return
 	}
 
@@ -71,18 +71,18 @@ func (h *TransactionHandler) AnalyzeTransaction(w http.ResponseWriter, r *http.R
 	result, err := h.commandBus.Dispatch(r.Context(), cmdmodel.AnalyzeTransactionCommand, cmd)
 	if err != nil {
 		h.logger.Error("failed to analyze transaction", zap.Error(err))
-		response.Error(w, http.StatusInternalServerError, "failed to analyze transaction")
+		httpresponse.Error(w, http.StatusInternalServerError, "failed to analyze transaction")
 		return
 	}
 
-	response.Created(w, result)
+	httpresponse.Created(w, result)
 }
 
 func (h *TransactionHandler) GetTransactionRisk(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid transaction id")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid transaction id")
 		return
 	}
 
@@ -90,18 +90,18 @@ func (h *TransactionHandler) GetTransactionRisk(w http.ResponseWriter, r *http.R
 	result, err := h.queryBus.Query(r.Context(), queryhandler.GetTransactionRiskKey, query)
 	if err != nil {
 		h.logger.Error("failed to get transaction risk", zap.Error(err))
-		response.Error(w, http.StatusNotFound, "transaction not found")
+		httpresponse.Error(w, http.StatusNotFound, "transaction not found")
 		return
 	}
 
-	response.OK(w, result)
+	httpresponse.OK(w, result)
 }
 
 func (h *TransactionHandler) FlagTransaction(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid transaction id")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid transaction id")
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *TransactionHandler) FlagTransaction(w http.ResponseWriter, r *http.Requ
 		FlaggedBy string `json:"flagged_by"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid request body")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -122,9 +122,9 @@ func (h *TransactionHandler) FlagTransaction(w http.ResponseWriter, r *http.Requ
 
 	if _, err := h.commandBus.Dispatch(r.Context(), cmdmodel.FlagTransactionCommand, cmd); err != nil {
 		h.logger.Error("failed to flag transaction", zap.Error(err))
-		response.Error(w, http.StatusInternalServerError, "failed to flag transaction")
+		httpresponse.Error(w, http.StatusInternalServerError, "failed to flag transaction")
 		return
 	}
 
-	response.NoContent(w)
+	httpresponse.NoContent(w)
 }

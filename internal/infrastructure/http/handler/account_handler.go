@@ -6,11 +6,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/hebertzin/cqrs/internal/infrastructure/http/httpresponse"
 	"go.uber.org/zap"
 
 	"github.com/hebertzin/cqrs/internal/application/bus"
 	cmdmodel "github.com/hebertzin/cqrs/internal/command/model"
-	"github.com/hebertzin/cqrs/internal/infrastructure/http/response"
+
 	queryhandler "github.com/hebertzin/cqrs/internal/query/handler"
 )
 
@@ -32,7 +33,7 @@ func (h *AccountHandler) GetAccountStatus(w http.ResponseWriter, r *http.Request
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid account id")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid account id")
 		return
 	}
 
@@ -40,18 +41,18 @@ func (h *AccountHandler) GetAccountStatus(w http.ResponseWriter, r *http.Request
 	result, err := h.queryBus.Query(r.Context(), queryhandler.GetAccountStatusKey, query)
 	if err != nil {
 		h.logger.Error("failed to get account status", zap.Error(err))
-		response.Error(w, http.StatusNotFound, "account not found")
+		httpresponse.Error(w, http.StatusNotFound, "account not found")
 		return
 	}
 
-	response.OK(w, result)
+	httpresponse.OK(w, result)
 }
 
 func (h *AccountHandler) BlockAccount(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid account id")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid account id")
 		return
 	}
 
@@ -60,7 +61,7 @@ func (h *AccountHandler) BlockAccount(w http.ResponseWriter, r *http.Request) {
 		BlockedBy string `json:"blocked_by"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid request body")
+		httpresponse.Error(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -72,11 +73,11 @@ func (h *AccountHandler) BlockAccount(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := h.commandBus.Dispatch(r.Context(), cmdmodel.BlockAccountCommand, cmd); err != nil {
 		h.logger.Error("failed to block account", zap.Error(err))
-		response.Error(w, http.StatusInternalServerError, err.Error())
+		httpresponse.Error(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.NoContent(w)
+	httpresponse.NoContent(w)
 }
 
 func (h *AccountHandler) GetFraudAlerts(w http.ResponseWriter, r *http.Request) {
@@ -89,9 +90,9 @@ func (h *AccountHandler) GetFraudAlerts(w http.ResponseWriter, r *http.Request) 
 	})
 	if err != nil {
 		h.logger.Error("failed to get fraud alerts", zap.Error(err))
-		response.Error(w, http.StatusInternalServerError, "failed to get fraud alerts")
+		httpresponse.Error(w, http.StatusInternalServerError, "failed to get fraud alerts")
 		return
 	}
 
-	response.OK(w, result)
+	httpresponse.OK(w, result)
 }
