@@ -14,7 +14,7 @@ import (
 
 func TestJSON(t *testing.T) {
 	w := httptest.NewRecorder()
-	http.JSON(w, http.StatusOK, map[string]string{"key": "value"})
+	httpresponse.JSON(w, http.StatusOK, map[string]string{"key": "value"})
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
@@ -26,11 +26,11 @@ func TestJSON(t *testing.T) {
 
 func TestError(t *testing.T) {
 	w := httptest.NewRecorder()
-	http.Error(w, http.StatusBadRequest, "something went wrong")
+	httpresponse.Error(w, http.StatusBadRequest, "something went wrong")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	var body http.ErrorResponse
+	var body httpresponse.ErrorResponse
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
 	assert.Equal(t, "Bad Request", body.Error)
 	assert.Equal(t, "something went wrong", body.Message)
@@ -38,18 +38,18 @@ func TestError(t *testing.T) {
 
 func TestCreated(t *testing.T) {
 	w := httptest.NewRecorder()
-	http.Created(w, map[string]int{"id": 1})
+	httpresponse.Created(w, map[string]int{"id": 1})
 	assert.Equal(t, http.StatusCreated, w.Code)
 }
 
 func TestOK(t *testing.T) {
 	w := httptest.NewRecorder()
-	http.OK(w, "data")
+	httpresponse.OK(w, "data")
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestNoContent(t *testing.T) {
 	w := httptest.NewRecorder()
-	http.NoContent(w)
+	httpresponse.NoContent(w)
 	assert.Equal(t, http.StatusNoContent, w.Code)
 }

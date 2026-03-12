@@ -17,7 +17,7 @@ func Recover(logger *zap.Logger) func(http.Handler) http.Handler {
 						zap.Any("error", err),
 						zap.String("path", r.URL.Path),
 					)
-					http.Error(w, http.StatusInternalServerError, "internal server error")
+					httpresponse.Error(w, http.StatusInternalServerError, "internal server error")
 				}
 			}()
 			next.ServeHTTP(w, r)
